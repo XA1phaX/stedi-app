@@ -1,0 +1,5 @@
+Start App:
+expo start --tunnel
+
+End app:
+ctrl + c
