@@ -5,7 +5,6 @@ import {
   View,
   Image,
   TouchableOpacity,
-  AsyncStorage,
   TextInput,
   Button,
 } from "react-native";
@@ -14,6 +13,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import OnboardingScreen from "./screens/OnboardingScreen";
 import Home from "./screens/Home";
 import { NavigationContainer } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AppStack = createNativeStackNavigator();
 const loggedInStates = {
@@ -73,18 +73,28 @@ const App = () => {
           keyboardType="numeric"
         ></TextInput>
         <Button
-          title="Verify"
+          title="Login"
           style={styles.button}
           onPress={async () => {
-            console.log("Verify Button was pressed!");
-            await fetch("https://dev.stedi.me/twofactorlogin", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/text",
-              },
-              body: phoneNumber,oneTimePassword
-            });
-            setLoggedinState(loggedInStates.CODE_SENT);
+            console.log("Login Button was pressed!");
+            const loginResponse = await fetch(
+              "https://dev.stedi.me/twofactorlogin",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/text",
+                },
+                body: JSON.stringify({
+                  phoneNumber: phoneNumber,
+                  oneTimePassword: oneTimePassword,
+                }),
+              }
+            );
+            if (loginResponse.status == 200) {
+              setLoggedinState(loggedInStates.LOGGED_IN);
+            } else {
+              setLoggedinState(loggedInStates.NOT_LOGGED_IN);
+            }
           }}
         />
       </View>
