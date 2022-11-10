@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   Button,
+  Alert,
 } from "react-native";
 import Navigation from "./components/Navigation";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -30,6 +31,29 @@ const App = () => {
   const [homeTodayScore, setHomeTodayScore] = React.useState(0);
   const [phoneNumber, setPhoneNumber] = React.useState("");
   const [oneTimePassword, setOneTimePassword] = React.useState(null);
+
+
+useEffect(() => {
+  const getSessionToken = async () => {
+    const sessionToken = await AsyncStorage.getItem("sessionToken");
+    console.log("sessionToken", sessionToken);
+    const validateResponse = await fetch('https://dev.stedi.me/validate/'+sessionToken,
+    {
+      method: 'GET',
+      headers: {
+        'content-Type': 'application/text'
+      }
+    });
+    if (validateResponse.status === 200) {
+      const userName = await validateResponse.text();
+      await AsyncStorage.setItem("userName", userName);
+      setLoggedinState(loggedInStates.LOGGED_IN);
+    }
+  }
+  getSessionToken();
+});
+
+
 
   if (isFirstLaunch == true) {
     return <OnboardingScreen setFirstLaunch={setFirstLaunch} />;
@@ -91,8 +115,12 @@ const App = () => {
               }
             );
             if (loginResponse.status == 200) {
+              const sessionToken = await loginResponse.text();
+              await AsyncStorage.setItem("sessionToken", sessionToken);
               setLoggedinState(loggedInStates.LOGGED_IN);
             } else {
+              console.log("Response status", loginResponse.status);
+              Alert.alert("Invalid", "Invalid login information");
               setLoggedinState(loggedInStates.NOT_LOGGED_IN);
             }
           }}
