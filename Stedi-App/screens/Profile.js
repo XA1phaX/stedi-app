@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,10 +8,12 @@ import {
   Share,
   ScrollView,
   Button,
+  TouchableOpacity,
 } from "react-native";
 import { Card, CardTitle, CardContent } from "react-native-material-cards";
-import { Camera } from "expo-camera";
 import BarChart from "react-native-bar-chart";
+import { Camera, CameraType } from "expo-camera";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // import Share from 'react-native-share';
 
 // const data = [
@@ -36,16 +38,13 @@ const Profile = (props) => {
   useEffect(() => {
     const getUserInfo = async () => {
       const cameraPermission = await Camera.requestCameraPermissionsAsync();
-      // setCameraPermission(cameraPermission);
-
+      //setCameraPermission(cameraPermission);
       const userName = await AsyncStorage.getItem("userName");
-      console.log("userName", userName);
+      console.log("userName".userName);
       setUserName(userName);
-
       const profilePhoto = await AsyncStorage.getItem("profilePhoto");
       setProfilePhoto(profilePhoto);
     };
-
     getUserInfo();
   });
 
@@ -60,15 +59,15 @@ const Profile = (props) => {
       console.log("Error", error);
     }
   };
-
   if (profilePhoto == null) {
     const cameraOptions = {
       quality: 0,
-      exif:false
-    }
+      exif: false,
+    };
     return (
       <View style={styles.container}>
         <Camera
+          type={CameraType.front}
           style={styles.camera}
           ref={cameraRef}
           onCameraReady={() => {
@@ -118,12 +117,12 @@ const Profile = (props) => {
           <CardContent>
             <Image
               style={{ height: 100, width: 100, borderRadius: 75 }}
-              source={require("../image/me.jpg")}
+              source={{ uri: profilePhoto }}
             />
             <Text
               style={{ marginTop: 10, marginBottom: 10, fontWeight: "bold" }}
             >
-              Sarah Romero
+              {userName}
             </Text>
 
             <Text style={{ marginTop: 20, marginBottom: 2 }}>
@@ -143,6 +142,26 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
     padding: 20,
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: "row",
+    backgroundColor: "transparent",
+    margin: 64,
+  },
+  button: {
+    flex: 1,
+    alignSelf: "flex-end",
+    alignItems: "center",
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
   },
 });
